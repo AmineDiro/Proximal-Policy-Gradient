@@ -16,7 +16,7 @@ class Net(nn.Module):
         return nn.Identity()(x)
     
 class Actor(nn.Module):
-    def __init__(self, obs_dim, hidden_size,act_dim):
+    def __init__(self,device, obs_dim, hidden_size,act_dim):
         super().__init__()
         self.logits_net = Net(obs_dim,hidden_size,act_dim).to(device)
 
