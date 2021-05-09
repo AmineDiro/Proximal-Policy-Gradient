@@ -16,43 +16,77 @@ import pickle
 if __name__ == "__main__":
     # TODO : if time change to args
     hidden_size = 32
-    lr = 1e-2
-    epochs = 100
-    batch_size = 5000
-    use_cuda = True
+
     output_path_model = "./models"
     output_results = "./results"
+    use_cuda = True
 
     # Get device to use GPU if available and use_cuda =True
     device = torch.device("cuda" if (use_cuda and torch.cuda.is_available()) else "cpu")
 
-    parser = argparse.ArgumentParser(description="Train/Test")
-    # parser.add_argument("--train", dest="train", action="store_true")
-    # parser.add_argument('--test', dest='run test', action='store_true')
+    parser = argparse.ArgumentParser(description="Parameters")
+    parser.add_argument(
+        "-e",
+        "--epochs",
+        type=int,
+        default=100,
+        metavar="N",
+        help="Batch size for training and scoring(default: 64)",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch_size",
+        type=int,
+        default=5000,
+        metavar="N",
+        help="Batch size for training and scoring(default: 64)",
+    )
+    parser.add_argument(
+        "-lr",
+        "--lr",
+        type=int,
+        default=1e-2,
+        metavar="N",
+        help="Batch size for training and scoring(default: 64)",
+    )
+    parser.add_argument(
+        '-se',
+        "--save_epoch",
+        type=int,
+        default=10,
+        metavar="N",
+        help="Saving model every N epoch",
+    )
+    parser.add_argument("--norender", "-nr", action="store_true")
+    parser.add_argument(
+        "--train", default=False, action="store_true", help="Flag to train"
+    )
 
-    parser.add_argument("--train", default=False, action="store_true",
-                    help="Flag to train")
+    parser.add_argument("--env", default="CartPole-v0")
     args = parser.parse_args()
+    name_env = args.env # CartPole-v0"
 
     # Create Environment and get obs dim and nb of actions
-    env = gym.make("CartPole-v0")
+    print(name_env)
+    env = gym.make(name_env)
     obs_dim = env.observation_space.shape[0]
     n_acts = env.action_space.n
 
-    
+    ## TODO : check env type and raise error if continuous action space
     # Init action network in device
     actor = Actor(device, obs_dim, hidden_size, n_acts).to(device)
 
-    if args.train : 
-        print('###### Training the policy ######')
+    if args.train:
+        # TODO : Refactor in train
+        print("###### Training the policy ######")
         # Instantiate optimizer
-        optimizer = Adam(actor.logits_net.parameters(), lr=lr)
+        optimizer = Adam(actor.logits_net.parameters(), lr=args.lr)
 
         # Training loop
         batch_avg_len = []
         batch_avg_return = []
 
-        for epoch in range(epochs):
+        for epoch in range(args.epochs):
             batch_loss, batch_rets, batch_lens = train_one_epoch(
                 env,
                 actor,
@@ -60,9 +94,9 @@ if __name__ == "__main__":
                 output_path_model,
                 device,
                 epoch,
-                render=True,
-                batch_size=5000,
-                save_epochs=10,
+                render=not (args.norender),
+                batch_size=args.batch_size,
+                save_epochs=args.save_epoch,
             )
             batch_avg_len.append(np.mean(batch_lens))
             batch_avg_return.append(np.mean(batch_avg_return))
@@ -72,15 +106,17 @@ if __name__ == "__main__":
             )
 
         # Save results for visualization and comparison
-        with open("simple_pg_results.pkl", "wb") as f:
-            pickle.dump({"avg_len": batch_avg_len, "avg_return": batch_avg_return},f)
+        with open("simple_pg_results_{}.pkl".format(name_env), "wb") as f:
+            pickle.dump({"avg_len": batch_avg_len, "avg_return": batch_avg_return}, f)
     else:
-        print('###### Testing with latest policy ######')
-         # Get device to use GPU if available and use_cuda =True
+        print("###### Testing with latest policy ######")
+        # Get device to use GPU if available and use_cuda =True
         # TODO : refactor this
         use_cuda = False
-        device = torch.device("cuda" if (use_cuda and torch.cuda.is_available()) else "cpu")
+        device = torch.device(
+            "cuda" if (use_cuda and torch.cuda.is_available()) else "cpu"
+        )
         actor = Actor(device, obs_dim, hidden_size, n_acts)
-        state_dict = torch.load("./models/simple_pg_model.pth", map_location="cpu")
+        state_dict = torch.load("./models/simple_pg_model_{}.pth".format(name_env), map_location="cpu")
         actor.load_state_dict(state_dict["actor"])
-        run_policy(device,env,actor)
+        run_policy(device, env, actor)

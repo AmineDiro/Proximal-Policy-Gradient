@@ -91,9 +91,11 @@ def train_one_epoch(
 
     # Save model ever N epochs
     if epoch % save_epochs == 0:
+        ## TODO : refactor maybe
+        name_env = env.spec.id
         torch.save(
             {"actor": actor.state_dict(), "optimizer": optimizer.state_dict(),},
-            os.path.join(output_path_model, "simple_pg_model.pth"),
+            os.path.join(output_path_model, "simple_pg_model_{}.pth".format(name_env)),
         )
 
     return batch_loss, batch_rets, batch_lens
