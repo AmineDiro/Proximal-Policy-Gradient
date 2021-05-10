@@ -44,11 +44,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-lr",
-        "--lr",
         type=int,
         default=1e-2,
         metavar="N",
-        help="Batch size for training and scoring(default: 64)",
+        help="Learning rate default 1e-2",
     )
     parser.add_argument(
         "-se",
@@ -63,9 +62,9 @@ if __name__ == "__main__":
         type=int,
         default=1000,
         metavar="N",
-        help="Saving model every N epoch",
+        help="Max episode length",
     )
-    parser.add_argument("--norender", "-nr", action="store_true")
+    parser.add_argument("--render", "-r", action="store_true")
     parser.add_argument(
         "--train", default=False, action="store_true", help="Flag to train"
     )
@@ -104,7 +103,7 @@ if __name__ == "__main__":
                 output_path_model,
                 device,
                 epoch,
-                render=not (args.norender),
+                render=args.render,
                 batch_size=args.batch_size,
                 save_epochs=args.save_epoch,
                 max_len=args.max_len,

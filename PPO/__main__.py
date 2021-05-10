@@ -27,14 +27,14 @@ if __name__ == "__main__":
     device = torch.device("cuda" if (use_cuda and torch.cuda.is_available()) else "cpu")
 
     parser = argparse.ArgumentParser(description="Parameters")
-    parser.add_argument("--env", default="CartPole-v0")
+    parser.add_argument("--env", default="CartPole-v0",help="Discrete action type env",)
     parser.add_argument(
         "-e",
         "--epochs",
         type=int,
         default=10,
         metavar="N",
-        help="Batch size for training and scoring(default: 64)",
+        help="Epochs to run training",
     )
     parser.add_argument(
         "-b",
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         type=int,
         default=5000,
         metavar="N",
-        help="Batch size for training and scoring(default: 64)",
+        help="Batch size for training (N*T)",
     )
     parser.add_argument(
         "-se",

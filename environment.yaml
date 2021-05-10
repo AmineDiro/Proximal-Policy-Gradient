@@ -1,4 +1,4 @@
-name: ppo
+name: test
 channels:
   - defaults
 dependencies:

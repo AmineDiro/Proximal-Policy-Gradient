@@ -3,15 +3,19 @@
 
 # Implementation of Proximal Policy paper
 
-PPO-Clip doesn’t have a KL-divergence term in the objective and doesn’t have a constraint at all. Instead relies on specialized clipping in the objective function to remove incentives for the new policy to get far from the old policy.
-* [Proximal Policy ](https://arxiv.org/abs/1707.06347), Schulman et al. 2017.
-* [Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477), Schulman et al. 2015.
-* [High Dimensional Continuous Control Using Generalized Advantage Estimation](https://arxiv.org/abs/1506.02438), Schulman et al. 2016.
+- PPO is a policy gradient method for reinforcement learning.
+- PPO is motivated by two challenge:
+    - **reducing the sample estimate variance by implementing a modified version of the GAE algorithm**
+    - **taking the biggest possible improvement step on a policy using the data we currently have, without stepping so far that we accidentally cause performance collapse**
+- PPO lets us do **multiple gradient updates per sample** by trying to **keep the policy close to the policy that was used to sample data.** It does so by **clipping gradient flow if the updated policy is not close to the policy used to sample the data.**
+
+- References to PPO : 
+    * [Proximal Policy ](https://arxiv.org/abs/1707.06347), Schulman et al. 2017.
+    * [Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477), Schulman et al. 2015.
+    * [High Dimensional Continuous Control Using Generalized Advantage Estimation](https://arxiv.org/abs/1506.02438), Schulman et al. 2016.
 
 
 # Training / Testing
-
-To test .... 
 
 
 Project Organization
@@ -39,29 +43,28 @@ Project Organization
 To run the training follow these steps :
 1. Clone the repository and cd to the directory
     ```bash
-    git clone  && cd OT-GAN/
+    git clone https://github.com/AmineDiro/Proximal-Policy-Gradient.git 
+    cd ./Proximal-Policy-Gradient
     ```
 2. Create conda env
     ```bash
-    conda env create -f ppo.yml
-    conda activate ppo
+    conda env create -f environment.yml
+    conda activate test
     ```
-2. The training has different arguments , run  the command `python -m OTGAN` with the proper arguments : 
+3. The training has different arguments , for running ppo use command `python -m PPO --train`, you can choose from the list of arguments below, some are only available for Simple Gradient Policy 
 
-    | Short                | Long         | Description                                                       | Default |
-    |----------------------|--------------|-------------------------------------------------------------------|---------|
-    | -c                   | --channels   | Nb of channels 1 for MNIST,3 for CIFAR , 3 by default             | 3       |
-    | -b                   | --batch_size | Batch size for training (default: 64)                             | 64      |
-    | -se                  | --save_epoch | Saving model every N epoch                                        | 2       |
-    | -si                  | --sample_interval| Interval number for sampling image from generator and saving them | 1       |
-    | --score / --no-score |              | Boolean args to get Inception score or not                        | True        | 
+4. You can also test pretrained  `SPG` or `PPO` algorithms by running  `python -m PPO --env `, followed by  the name of the environement : `CartPole-v0` or `LunarLander-v2`
 
-**NOTE :** The Notebook `Results.ipynb`  presents the main results from training on the CIFAR10 dataset. We plot the generated images from training, the loss of generator, critic and the inception score while training. You can click on the **[Open In Colab]** to access the notebook on google collab.
 
-## TODO : 
-- implement ppo buffer
-- Implement training : 
-    - GAE loss 
-    - Figure out with 1 
-    - Do parallel processing using MPI or Cuda ?? :O
-    -  
+## Arguments 
+
+| Short     | Long         | Description                                                | Default       | PPO                | SPG                |
+|-----------|--------------|------------------------------------------------------------|---------------|--------------------|--------------------|
+| --env     |              | Discrete action type environement                          | "CartPole-v0" | :heavy_check_mark: | :heavy_check_mark: |
+| -e        | --epochs     | Epochs to run training                                     | 5000          | :heavy_check_mark: | :heavy_check_mark: |
+| -b        | --batch_size | Batch size for training (N*T)                              | 2             | :heavy_check_mark: | :heavy_check_mark: |
+| -se       | --save_epoch | Saving model every N epoch                                 | 10            | :heavy_check_mark: | :heavy_check_mark: |
+| --train   |              | Put this Flag to train model                               | False         | :heavy_check_mark: | :heavy_check_mark: |
+| -r        | --render     | Put this flag to avoid visualizing first epoch of training | False         | :white_check_mark: | :heavy_check_mark: |
+| --max_len |              | Max episode length                                         | 1000          | :white_check_mark: | :heavy_check_mark: |
+| --lr      |              | Learning rate default 1e-2                                 | 1e-2          | :white_check_mark: | :heavy_check_mark: |
