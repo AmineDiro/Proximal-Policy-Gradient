@@ -50,7 +50,7 @@ if __name__ == "__main__":
         help="Batch size for training and scoring(default: 64)",
     )
     parser.add_argument(
-        '-se',
+        "-se",
         "--save_epoch",
         type=int,
         default=10,
@@ -64,11 +64,11 @@ if __name__ == "__main__":
 
     parser.add_argument("--env", default="CartPole-v0")
     args = parser.parse_args()
-    name_env = args.env # CartPole-v0"
+    name_env = args.env  # CartPole-v0"
 
     # Create Environment and get obs dim and nb of actions
     print(name_env)
-    env = gym.make(name_env)
+    env = gym.make(name_env).env
     obs_dim = env.observation_space.shape[0]
     n_acts = env.action_space.n
 
@@ -117,6 +117,11 @@ if __name__ == "__main__":
             "cuda" if (use_cuda and torch.cuda.is_available()) else "cpu"
         )
         actor = Actor(device, obs_dim, hidden_size, n_acts)
-        state_dict = torch.load("./models/simple_pg_model_{}.pth".format(name_env), map_location="cpu")
+        state_dict = torch.load(
+            "./models/simple_pg_model_{}.pth".format(name_env), map_location="cpu"
+        )
         actor.load_state_dict(state_dict["actor"])
         run_policy(device, env, actor)
+
+    
+

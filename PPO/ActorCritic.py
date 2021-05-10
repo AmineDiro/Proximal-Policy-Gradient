@@ -35,7 +35,14 @@ class Actor(nn.Module):
     @staticmethod
     def _log_prob_from_distribution(pi, act):
         return pi.log_prob(act)
-    
+
+    def forward(self, obs, act=None):
+        pi = self._policy(obs)
+        logp_a = None
+        if act is not None:
+            logp_a = self._log_prob_from_distribution(pi, act)
+        return pi, logp_a
+
 class Critic(nn.Module):
     def __init__(self, device, obs_dim, hidden_size):
         super().__init__()
