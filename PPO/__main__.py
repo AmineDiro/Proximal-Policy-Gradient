@@ -1,6 +1,7 @@
 import os
 import torch
 import argparse
+import pickle 
 
 import numpy as np
 import gym
@@ -93,6 +94,12 @@ if __name__ == "__main__":
 
         o, ep_ret, ep_len = env.reset(), 0, 0
 
+        ## REsults
+        batch_avg_len = np.zeros(args.epochs)
+        batch_std_len = np.zeros(args.epochs)
+        batch_avg_return = np.zeros(args.epochs)
+        batch_std_return = np.zeros(args.epochs)
+
         # Main loop: collect experience in env and update policy and value function/log each epoch
         for epoch in range(args.epochs):
             batch_ret = []
@@ -136,6 +143,12 @@ if __name__ == "__main__":
                     batch_ep_len.append(ep_len)
                     o, ep_ret, ep_len = env.reset(), 0, 0
 
+            # Save mean rturns and std and mean lengths and std
+            batch_avg_return[epoch] = np.mean(batch_ret)
+            batch_std_return[epoch] = np.std(batch_ret)
+            batch_avg_len[epoch] = np.mean(batch_ep_len)
+            batch_std_len[epoch] = np.std(batch_ep_len)
+
             print(
                 "epoch: %3d \t return: %.3f \t ep_len: %.3f"
                 % (epoch, np.mean(batch_ret), np.mean(batch_ep_len))
@@ -155,6 +168,16 @@ if __name__ == "__main__":
             # Perform PPO update
             train(device, buffer, player, pi_optimizer, v_optimizer)
 
+        with open("./results/ppo_results_{}.pkl".format(name_env), "wb") as f:
+            pickle.dump(
+                {
+                    "lens": batch_avg_len,
+                    "std_lens": batch_std_len,
+                    "returns": batch_avg_return,
+                    "std_return": batch_std_return,
+                },
+                f,
+            )
     else:
         print("###################### Evaluating model #################")
         # Get device to use GPU if available and use_cuda =True

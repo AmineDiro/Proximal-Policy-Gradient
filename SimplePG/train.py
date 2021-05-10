@@ -22,6 +22,7 @@ def train_one_epoch(
     render=True,
     batch_size=5000,
     save_epochs=10,
+    max_len =1000
 ):
     # make some empty lists for logging.
     batch_obs = []  # for observations
@@ -57,7 +58,7 @@ def train_one_epoch(
         batch_acts.append(act.item())
         ep_rews.append(rew)
 
-        if done:
+        if done or (len(ep_rews)==max_len): 
             # if episode is over, record info about episode
             ep_ret, ep_len = sum(ep_rews), len(ep_rews)
             batch_rets.append(ep_ret)
@@ -75,7 +76,8 @@ def train_one_epoch(
             # end experience loop if we sampled trajectories
             if len(batch_obs) > batch_size:
                 break
-        env.close()
+        if render :
+            env.close()
 
     # take a single policy gradient update step
     optimizer.zero_grad()

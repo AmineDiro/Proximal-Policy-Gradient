@@ -43,7 +43,7 @@ def train(
     pi_optimizer,
     v_optimizer,
     clip_ratio=0.2,
-    target_kl=0.1,
+    target_kl=0.01,
     train_pi_iters=80,
     train_v_iters=80
 ):
@@ -58,9 +58,9 @@ def train(
         # kl = np.mean(pi_info['kl'])
         #kl = pi_info['kl']
         # if kl > 1.5 * target_kl:
-        #     print('Early stopping at step %d due to reaching max kl.'%i)
-        #     break
-        loss_pi.backward()
+        #      print('Early stopping at step %d due to reaching max kl.'%i)
+        #      break
+        # loss_pi.backward()
         # mpi_avg_grads(ac.pi)    # average grads across MPI processes
         pi_optimizer.step()
 

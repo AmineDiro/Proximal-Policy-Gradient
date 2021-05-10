@@ -19,24 +19,32 @@ Project Organization
 
 `PPO_Project` directory is structured as follows  
 
-   
-    ├── OTGAN
-    │   ├── dataset.py          <- Loading the two batch datasets : MNIST or CIFAR10
-    │   ├── Discriminator.py    <- Critic architecture (1 or 3 input channels)
-    │   ├── Generator.py        <- Generator architecture  (1 or 3 output channels)
-    │   ├── InceptionScore.py   <- Returns inception score for batchs or for dataset
-    │   ├── __init__.py
-    │   ├── __main__.py
-    │   ├── SinkhornDistance.py <- Computes the Minibatch Energy distance
-    │   ├── train.py            <- Main training loop
-    │   └── utils.py            <- Weight init, plotting and sampling
+
+    ├── models                  <- Saved pytorch models, loaded when testing 
+    └── SimplePG                <- Simple Policy Gradient 
+        ├── Actor.py            <- Policy architecture, 2 layer NN
+        ├── run.py              <- Used when testing trained model
+        └── train.py            <- Code for updating policy
+    ├── PPO
+    │   ├── ActorCritic.py      <- Policy and Value function architecture, 2 layer NN
+    │   ├── PPOBuffer.py        <- Buffer class needed to store obs,ac,pi and compute advantage
+    │   ├── run.py              <- Used when testing trained model
+    │   └── train.py            <- Code for updating policy
+    ├── ppo.yaml                <- Miniconda env dependencies
+    ├── results                 <- Directory for results
+    ├── setup.py                <- Run to setup environement
 
 
 
 To run the training follow these steps :
 1. Clone the repository and cd to the directory
     ```bash
-    git clone https://github.com/AmineDiro/OT-GAN.git && cd OT-GAN/
+    git clone  && cd OT-GAN/
+    ```
+2. Create conda env
+    ```bash
+    conda env create -f ppo.yml
+    conda activate ppo
     ```
 2. The training has different arguments , run  the command `python -m OTGAN` with the proper arguments : 
 

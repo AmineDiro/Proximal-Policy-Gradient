@@ -4,6 +4,7 @@ import argparse
 
 import torch
 import numpy as np
+import pandas as pd
 from torch.optim import Adam
 
 import gym
@@ -57,6 +58,13 @@ if __name__ == "__main__":
         metavar="N",
         help="Saving model every N epoch",
     )
+    parser.add_argument(
+        "--max_len",
+        type=int,
+        default=1000,
+        metavar="N",
+        help="Saving model every N epoch",
+    )
     parser.add_argument("--norender", "-nr", action="store_true")
     parser.add_argument(
         "--train", default=False, action="store_true", help="Flag to train"
@@ -83,8 +91,10 @@ if __name__ == "__main__":
         optimizer = Adam(actor.logits_net.parameters(), lr=args.lr)
 
         # Training loop
-        batch_avg_len = []
-        batch_avg_return = []
+        batch_avg_len = np.zeros(args.epochs)
+        batch_std_len = np.zeros(args.epochs)
+        batch_avg_return = np.zeros(args.epochs)
+        batch_std_return = np.zeros(args.epochs)
 
         for epoch in range(args.epochs):
             batch_loss, batch_rets, batch_lens = train_one_epoch(
@@ -97,17 +107,27 @@ if __name__ == "__main__":
                 render=not (args.norender),
                 batch_size=args.batch_size,
                 save_epochs=args.save_epoch,
+                max_len=args.max_len,
             )
-            batch_avg_len.append(np.mean(batch_lens))
-            batch_avg_return.append(np.mean(batch_avg_return))
+            batch_avg_return[epoch] = np.mean(batch_rets)
+            batch_std_return[epoch] = np.std(batch_rets)
+            batch_avg_len[epoch] = np.mean(batch_lens)
+            batch_std_len[epoch] = np.std(batch_lens)
             print(
                 "epoch: %3d \t loss: %.3f \t return: %.3f \t ep_len: %.3f"
                 % (epoch, batch_loss, np.mean(batch_rets), np.mean(batch_lens))
             )
-
         # Save results for visualization and comparison
-        with open("simple_pg_results_{}.pkl".format(name_env), "wb") as f:
-            pickle.dump({"avg_len": batch_avg_len, "avg_return": batch_avg_return}, f)
+        with open("./results/simple_pg_results_{}.pkl".format(name_env), "wb") as f:
+            pickle.dump(
+                {
+                    "lens": batch_avg_len,
+                    "std_lens": batch_std_len,
+                    "returns": batch_avg_return,
+                    "std_return": batch_std_return,
+                },
+                f,
+            )
     else:
         print("###### Testing with latest policy ######")
         # Get device to use GPU if available and use_cuda =True
@@ -122,6 +142,4 @@ if __name__ == "__main__":
         )
         actor.load_state_dict(state_dict["actor"])
         run_policy(device, env, actor)
-
-    
 
